@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "AI Prompt Manager",
+  "version": "2.0.0",
+  "description": "管理 AI 角色和 Prompt。🐙",
+  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "clipboardWrite",
+    "downloads"
+  ],
+  
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://*.openai.com/*",
+    "https://gemini.google.com/*",
+    "https://*.google.com/*",
+    "https://tongyi.aliyun.com/*",
+    "https://www.qianwen.com/*",
+    "https://chatglm.cn/*",
+    "https://yiyan.baidu.com/*",
+    "https://kimi.moonshot.cn/*"
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Prompt Manager",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["sidebar.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

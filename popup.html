@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      width: 500px; 
+      padding: 20px; 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    h2 { 
+      margin-top: 0; 
+      color: #333;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prompts-list {
+      margin: 20px 0;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .prompt-card {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 10px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid #667eea;
+      transition: all 0.3s ease;
+    }
+    .prompt-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .prompt-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prompt-preview {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      max-height: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: pre-wrap;
+    }
+    .prompt-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-primary:hover { background: #0056b3; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-secondary:hover { background: #5a6268; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-danger:hover { background: #c82333; }
+    .add-prompt {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: 2px dashed rgba(255,255,255,0.5);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      margin: 20px 0;
+      transition: all 0.3s ease;
+    }
+    .add-prompt:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h3 { margin: 0; color: #333; }
+    .close { font-size: 24px; cursor: pointer; color: #999; }
+    .close:hover { color: #333; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .form-group textarea {
+      height: 200px;
+      resize: vertical;
+      font-family: 'Monaco', 'Consolas', monospace;
+      line-height: 1.6;
+    }
+    .icon-picker {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .icon-option {
+      font-size: 24px;
+      padding: 8px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      background: white;
+      border: 2px solid transparent;
+    }
+    .icon-option:hover {
+      background: #e9ecef;
+      transform: scale(1.1);
+    }
+    .icon-option.selected {
+      border-color: #667eea;
+      background: #e9ecef;
+    }
+    .status {
+      padding: 12px;
+      margin: 15px 0;
+      border-radius: 6px;
+      font-weight: 500;
+      display: none;
+    }
+    .status.success { background: #d4edda; color: #155724; display: block; }
+    .status.error { background: #f8d7da; color: #721c24; display: block; }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: 20px; }
+    
+    /* 开关样式 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .3s;
+      border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #667eea;
+    }
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+  </style>
+</head>
+<body>
+  <h2>🎭 AI Prompt Manager</h2>
+  
+  <div class="settings-row" style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div>
+      <div style="font-weight: 600; color: #333;">📑 显示侧边栏</div>
+      <div style="font-size: 12px; color: #666; margin-top: 5px;">在所有网站显示侧边栏</div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="sidebarToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div class="prompts-list" id="promptsList">
+    <div class="empty-state">
+      <div class="empty-state-icon">📭</div>
+      <div>暂无角色</div>
+      <div style="font-size: 13px; margin-top: 10px;">点击下方按钮添加第一个角色</div>
+    </div>
+  </div>
+  
+  <div class="add-prompt" id="addPrompt">
+    <div style="font-size: 32px; margin-bottom: 10px;">➕</div>
+    <div style="font-weight: 600;">添加新角色</div>
+    <div style="font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 5px;">
+      创建你的专属 AI 角色
+    </div>
+  </div>
+  
+  <div class="status" id="status"></div>
+  
+  <div class="modal" id="promptModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">🎨 添加新角色</h3>
+        <span class="close" id="closeModal">&times;</span>
+      </div>
+      
+      <div class="form-group">
+        <label>角色名称</label>
+        <input type="text" id="promptName" placeholder="例如：代码专家、写作助手...">
+      </div>
+      
+      <div class="form-group">
+        <label>角色图标</label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="promptIcon" placeholder="选择或输入图标" maxlength="2" style="width: 80px; font-size: 20px; text-align: center;">
+          <span id="iconPreview" style="font-size: 32px; margin-left: 10px;">🎭</span>
+        </div>
+        <div class="icon-picker" id="iconPicker">
+          <!-- 图标选项会动态插入 -->
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Prompt 内容</label>
+        <textarea id="promptContent" placeholder="你是一个专业的..."></textarea>
+      </div>
+      
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn btn-secondary" id="cancelBtn">取消</button>
+        <button class="btn btn-primary" id="saveBtn">💾 保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
